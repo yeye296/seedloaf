@@ -193,7 +193,7 @@ try:
     driver.execute_script("arguments[0].scrollIntoView(true);", startworld)
     driver.execute_script("arguments[0].click();", startworld)
     print("Clicked start")
-    time.sleep(2)
+    time.sleep(15)
 
 except Exception as e:
     print(f"Error occurred(start): {e}")

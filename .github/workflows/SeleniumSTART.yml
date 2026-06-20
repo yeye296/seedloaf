@@ -1,12 +1,6 @@
 name: Run Selenium Script 
 
 on:
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - '**.md'
-      - '**.txt'
   workflow_dispatch:
     inputs:
       use_session_cache:
@@ -22,7 +16,7 @@ jobs:
   run-selenium:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout Repository
@@ -128,3 +122,30 @@ jobs:
         with:
           path: /tmp/seedloaf-session
           key: seedloaf-session-cache-${{ github.run_number }}
+
+      # --- 新增的防暂停代码开始 ---
+      - name: Commit time.txt to repo
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 如果 time.txt 不存在，说明是第一次运行
+          if [ ! -f time.txt ]; then
+            echo "首次生成时间：$(date +'%Y-%m-%d %H:%M:%S')" > time.txt
+          else
+            echo "$(date +'%Y-%m-%d %H:%M:%S')" > time.txt
+          fi
+          
+          git add time.txt
+          
+          # 如果有更改再提交
+          if git diff --cached --quiet; then
+            echo "无变化，无需提交"
+          else
+            git commit -m "⏱️ 更新时间文件: $(date +'%Y-%m-%d %H:%M:%S')"
+            git push origin HEAD:main
+          fi
+      # --- 新增的防暂停代码结束 ---

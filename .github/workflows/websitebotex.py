@@ -162,7 +162,7 @@ try:
     # Wait for the start button to be visible
     try:
         wait = WebDriverWait(driver, 20)
-        startworld = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn-primary")))
+        startworld = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn-primary.relative")))
         print("After waiting for start:\n"+driver.current_url)
     except:
         try: # Check if password is incorrect or stop button is already present
@@ -193,7 +193,7 @@ try:
     driver.execute_script("arguments[0].scrollIntoView(true);", startworld)
     driver.execute_script("arguments[0].click();", startworld)
     print("Clicked start")
-    time.sleep(15)
+    time.sleep(10)
 
 except Exception as e:
     print(f"Error occurred(start): {e}")

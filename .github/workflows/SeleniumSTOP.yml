@@ -133,7 +133,7 @@ jobs:
             -H "authorization: Bearer $TOKEN" \
             -H 'connect-protocol-version: 1' \
             -H 'content-type: application/json' \
-            -d '{"id":"$SERVER_ID"}' \
+            -d "{\"id\":\"$SERVER_ID\"}" \
             -w "\nHTTP状态: %{http_code}\n"
 
       - name: Run Selenium Stop Script

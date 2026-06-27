@@ -178,7 +178,7 @@ try:
                     sys.exit()
             else:
                 try:
-                    startworld = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn-primary")))
+                    startworld = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.btn-primary.relative")))
                     print("Start button found — world already stopped.")
                     driver.quit()
                     sys.exit()

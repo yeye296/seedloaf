@@ -1,4 +1,4 @@
-name: Run Selenium Script 
+name: Run Selenium Script (Start)
 
 on:
   workflow_dispatch:
@@ -90,6 +90,44 @@ jobs:
           key: seedloaf-session-cache-${{ github.run_id }}
           restore-keys: |
             seedloaf-session-cache-
+
+      - name: 🔍 curl 直接测试 StartSession
+        if: ${{ inputs.start_or_stop == 'true' }}
+        env:
+          SEEDLOAF_ACCOUNT: ${{ secrets.SEEDLOAF_ACCOUNT }}
+          EMAIL: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          SERVER_ID: ${{ secrets.SERVER_ID }}
+        run: |
+          # EMAIL=$(echo "$SEEDLOAF_ACCOUNT" | cut -d',' -f2)
+          # PASSWORD=$(echo "$SEEDLOAF_ACCOUNT" | cut -d',' -f3)
+          echo "📡 登录获取 token..."
+          LOGIN=$(curl -s -X POST \
+            'https://clerk.seedloaf.com/v1/client/sign_ins?__clerk_api_version=2025-11-10' \
+            -H 'content-type: application/x-www-form-urlencoded' \
+            -H 'origin: https://seedloaf.com' \
+            -c /tmp/clerk_cookies.txt \
+            --data-urlencode "identifier=$EMAIL" \
+            --data-urlencode "password=$PASSWORD")
+          SESSION_ID=$(echo "$LOGIN" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['response']['created_session_id'])")
+          echo "✅ Session ID: ${SESSION_ID:0:20}..."
+          echo "📡 Touch 获取 token..."
+          TOUCH=$(curl -s -X POST \
+            "https://clerk.seedloaf.com/v1/client/sessions/${SESSION_ID}/touch?__clerk_api_version=2025-11-10" \
+            -H 'content-type: application/x-www-form-urlencoded' \
+            -H 'origin: https://seedloaf.com' \
+            -b /tmp/clerk_cookies.txt \
+            -d 'active_organization_id=&intent=focus')
+          TOKEN=$(echo "$TOUCH" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['response']['last_active_token']['jwt'])")
+          echo "✅ Token 长度: ${#TOKEN}"
+          echo "📡 调用 StartSession..."
+          curl -s -X POST \
+            'https://api.seedloaf.com/connect/worlds.v1.SessionService/StartSession' \
+            -H "authorization: Bearer $TOKEN" \
+            -H 'connect-protocol-version: 1' \
+            -H 'content-type: application/json' \
+            -d "{\"id\":\"$SERVER_ID\"}" \
+            -w "\nHTTP状态: %{http_code}\n"
 
       - name: Run Selenium Start Script
         if: ${{ inputs.start_or_stop == 'true' }}

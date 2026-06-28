@@ -1,4 +1,4 @@
-name: Run Selenium Script (Start)
+name: Run Selenium Script (START)
 
 on:
   workflow_dispatch:
@@ -129,12 +129,12 @@ jobs:
             -d "{\"id\":\"$SERVER_ID\"}" \
             -w "\nHTTP状态: %{http_code}\n"
 
-      - name: Run Selenium Start Script
-        if: ${{ inputs.start_or_stop == 'true' }}
-        env:
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-        run: python .github/workflows/websitebotex.py
+      # - name: Run Selenium Start Script
+      #   if: ${{ inputs.start_or_stop == 'true' }}
+      #   env:
+      #     USERNAME: ${{ secrets.USERNAME }}
+      #     PASSWORD: ${{ secrets.PASSWORD }}
+      #   run: python .github/workflows/websitebotex.py
 
       - name: Run Selenium Stop Script
         if: ${{ inputs.start_or_stop == 'false' }}
